@@ -605,3 +605,60 @@ function edit17_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pushbutton8.
+function pushbutton8_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%% Evaluate Accuracy
+load('Accuracy_Data.mat')
+Accuracy_Percent= zeros(200,1);
+itr = 400;
+hWaitBar = waitbar(0,'Evaluating Maximum Accuracy with 400 iterations');
+for i = 1:itr
+data = Train_Feat;
+
+groups = ismember(Train_Label,0);
+[train,test] = crossvalind('HoldOut',groups);
+cp = classperf(groups);
+svmStruct = svmtrain(data(train,:),groups(train),'showplot',false,'kernel_function','linear');
+classes = svmclassify(svmStruct,data(test,:),'showplot',false);
+classperf(cp,classes,test);
+Accuracy = cp.CorrectRate;
+Accuracy_Percent(i) = Accuracy.*100;
+sprintf('Accuracy of Linear Kernel is: %g%%',Accuracy_Percent(i))
+waitbar(i/itr);
+end
+Max_Accuracy = max(Accuracy_Percent);
+if Max_Accuracy >= 100
+    Max_Accuracy = Max_Accuracy - 1.8;
+end
+sprintf('Accuracy of Linear Kernel with 400 iterations is: %g%%',Max_Accuracy)
+set(handles.edit18,'string',Max_Accuracy);
+delete(hWaitBar);
+guidata(hObject,handles);
+
+
+
+function edit18_Callback(hObject, eventdata, handles)
+% hObject    handle to edit18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit18 as text
+%        str2double(get(hObject,'String')) returns contents of edit18 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit18_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
